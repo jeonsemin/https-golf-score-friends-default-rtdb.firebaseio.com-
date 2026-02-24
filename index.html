@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>친구들 골프 스코어 랭킹 (공유 버전)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    body {
+      background: #0f172a;
+      color: #e5e7eb;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+    .app {
+      width: 100%;
+      max-width: 980px;
+      background: #020617;
+      border-radius: 20px;
+      padding: 18px 16px 24px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      box-shadow: 0 22px 50px rgba(0, 0, 0, 0.6);
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .title {
+      font-size: 22px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #022c22;
+      font-weight: 600;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: #9ca3af;
+    }
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .room-info {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .btn {
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+      font-size: 12px;
+      padding: 6px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn.primary {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #022c22;
+      border-color: transparent;
+      font-weight: 600;
+    }
+    .btn.danger {
+      border-color: rgba(248, 113, 113, 0.8);
+      color: #fecaca;
+    }
+    .btn.small {
+      padding: 4px 10px;
+      font-size: 11px;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
+    }
+    .layout-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr);
+      gap: 14px;
+    }
+    @media (max-width: 860px) {
+      .layout-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+    .card {
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 16px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      padding: 12px 12px 14px;
+      margin-bottom: 8px;
+    }
+    .card-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .card-sub {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+    .input-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+    .field {
+      flex: 1;
+      min-width: 150px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    label {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+    .input, .select {
+      width: 100%;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: rgba(15, 23, 42, 0.95);
+      color: #e5e7eb;
+      font-size: 13px;
+      outline: none;
+      transition: all 0.15s ease;
+    }
+    .input:focus, .select:focus {
+      border-color: #22c55e;
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.4);
+    }
+    .helper {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+    .error-text {
+      font-size: 11px;
+      color: #fecaca;
+      margin-top: 2px;
+    }
+    .updated {
+      font-size: 10px;
+      color: #6b7280;
+    }
+    .top3-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .top3-item {
+      flex: 1;
+      min-width: 100px;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: radial-gradient(circle at top left, rgba(34, 197, 94, 0.22), transparent 55%),
+                  rgba(15, 23, 42, 0.95);
+      padding: 8px 9px 9px;
+      font-size: 11px;
+    }
+    .top3-rank {
+      font-weight: 600;
+      opacity: 0.8;
+      margin-bottom: 2px;
+    }
+    .top3-name {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .top3-score {
+      font-size: 12px;
+      color: #bbf7d0;
+    }
+    .summary-row {
+      margin-top: 8px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      font-size: 11px;
+    }
+    .summary-pill {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      color: #9ca3af;
+    }
+    .badge-small {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      margin-left: 4px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    th, td {
+      padding: 8px 8px;
+      text-align: left;
+      white-space: nowrap;
+    }
+    th {
+      background: rgba(15, 23, 42, 1);
+      color: #9ca3af;
+      border-bottom: 1px solid rgba(31, 41, 55, 1);
+      font-size: 11px;
+      font-weight: 500;
+    }
+    td {
+      border-bottom: 1px solid rgba(30, 41, 59, 0.9);
+    }
+    tbody tr:nth-child(even) {
+      background: rgba(15, 23, 42, 0.9);
+    }
+    tbody tr:hover {
+      background: rgba(30, 64, 175, 0.5);
+    }
+    .align-right {
+      text-align: right;
+    }
+    .rank-cell {
+      font-weight: 600;
+    }
+    .name-main {
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .name-sub {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+    .score-good {
+      color: #bbf7d0;
+      font-weight: 600;
+    }
+    .score-mid {
+      color: #facc15;
+      font-weight: 600;
+    }
+    .score-bad {
+      color: #fca5a5;
+      font-weight: 600;
+    }
+    .empty {
+      padding: 14px 8px;
+      text-align: center;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .room-warning {
+      font-size: 11px;
+      color: #facc15;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="title-wrap">
+        <div class="title">
+          🏌️ 친구들 골프 랭킹
+          <span class="badge">공유 버전</span>
+        </div>
+        <div class="subtitle">
+          방 코드만 맞추면, 카톡방 친구들이 전부 같은 랭킹 보드를 함께 사용합니다.
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="room-info" id="roomInfo">방에 입장해주세요</div>
+      </div>
+    </header>
+
+    <!-- 방 선택 카드 -->
+    <section class="card" style="margin-bottom:16px;">
+      <div class="card-title-row">
+        <div>
+          <div class="card-title">방 선택</div>
+          <div class="card-sub">카톡방마다 하나의 방 코드를 정해서 같이 쓰면 됩니다. (예: "양잔디동호회")</div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="field">
+          <label for="roomCodeInput">방 코드</label>
+          <input id="roomCodeInput" class="input" type="text" placeholder="예: 양잔디동호회, 2026봄모임 ..." />
+          <div class="helper">같은 코드를 입력한 사람끼리 데이터가 공유됩니다.</div>
+        </div>
+      </div>
+      <button class="btn primary" id="btnJoinRoom">이 방으로 입장</button>
+      <div class="room-warning">※ 방 코드를 바꾸면 다른 방 데이터가 보입니다. 카톡방에서 코드 하나 정해서 모두 똑같이 입력하세요.</div>
+      <div id="roomError" class="error-text" style="display:none;"></div>
+    </section>
+
+    <main class="layout-grid" id="mainContent" style="opacity:0.4; pointer-events:none;">
+      <!-- 왼쪽: 플레이어 추가 + 스코어 입력 + Top3 -->
+      <section>
+        <div class="card">
+          <div class="card-title-row">
+            <div>
+              <div class="card-title">플레이어 추가</div>
+              <div class="card-sub">같이 치는 친구들 이름을 먼저 등록하세요. (방 전체 공유)</div>
+            </div>
+          </div>
+
+          <div class="input-row">
+            <div class="field">
+              <label for="playerNameInput">이름 / 닉네임</label>
+              <input id="playerNameInput" class="input" type="text" placeholder="예: 철수, 영희, John..." />
+            </div>
+          </div>
+          <button class="btn primary small" id="btnAddPlayer">플레이어 추가</button>
+          <div class="helper">이름만 간단히 적어도 됩니다. (한 번 추가하면 방의 모든 사람이 볼 수 있어요)</div>
+          <div id="playerError" class="error-text" style="display:none;"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title-row">
+            <div>
+              <div class="card-title">스코어 입력</div>
+              <div class="card-sub">라운드 끝날 때마다 날짜·장소와 함께 점수를 기록해두세요. (실시간 공유)</div>
+            </div>
+            <div class="updated" id="updatedLabel">-</div>
+          </div>
+
+          <div class="input-row">
+            <div class="field">
+              <label for="playerSelect">플레이어</label>
+              <select id="playerSelect" class="select">
+                <option value="">먼저 플레이어를 추가하세요</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="input-row">
+            <div class="field">
+              <label for="roundDateInput">라운드 날짜</label>
+              <input id="roundDateInput" class="input" type="date" />
+              <div class="helper">입력 안 하면 오늘 날짜로 자동 기록됩니다.</div>
+            </div>
+            <div class="field">
+              <label for="roundLabelInput">라운드 이름 / 장소</label>
+              <input id="roundLabelInput" class="input" type="text" placeholder="예: 동네 골프장, 라운드1 ..." />
+              <div class="helper">예: 2026-03-01 동네 골프장 같이 메모용으로 사용.</div>
+            </div>
+          </div>
+
+          <div class="input-row">
+            <div class="field">
+              <label for="scoreInput">이번 라운드 스코어 (타수)</label>
+              <input id="scoreInput" class="input" type="number" min="50" max="200" placeholder="예: 72" />
+              <div class="helper">대략 50~120 사이 정도로 입력하면 됩니다. (제한은 없음)</div>
+            </div>
+          </div>
+
+          <button class="btn primary small" id="btnAddScore">스코어 기록</button>
+          <div id="scoreError" class="error-text" style="display:none;"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title-row">
+            <div>
+              <div class="card-title">
+                Top 3
+                <span class="badge-small">평균 스코어 기준</span>
+              </div>
+              <div class="card-sub">지금까지 입력된 스코어 기준 상위 3명입니다.</div>
+            </div>
+          </div>
+          <div id="top3Container">
+            <div class="empty">데이터가 없습니다. 플레이어를 추가하고 스코어를 입력해보세요.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 오른쪽: 랭킹 테이블 -->
+      <section>
+        <div class="card">
+          <div class="card-title-row">
+            <div>
+              <div class="card-title">랭킹</div>
+              <div class="card-sub">평균 스코어가 낮을수록 순위가 높습니다. (최근 라운드 정보 표시)</div>
+            </div>
+            <div class="card-sub" id="summaryInfo">-</div>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:40px;">순위</th>
+                  <th>플레이어</th>
+                  <th class="align-right">평균</th>
+                  <th class="align-right">베스트</th>
+                  <th class="align-right">라운드 수</th>
+                </tr>
+              </thead>
+              <tbody id="rankingBody">
+              </tbody>
+            </table>
+          </div>
+          <div id="emptyRanking" class="empty" style="display:none;">
+            아직 아무 데이터가 없습니다. 왼쪽에서 플레이어와 스코어를 추가하세요.
+          </div>
+          <div style="margin-top:6px; display:flex; justify-content:space-between; align-items:center;">
+            <button class="btn danger small" id="btnResetRoom">이 방 데이터 초기화</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Firebase SDK (CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <script>
+    // 1) 여기 firebaseConfig에 본인 프로젝트 값 붙여넣기
+    // Firebase 콘솔에서 웹 앱 등록했을 때 나온 코드 그대로 사용
+    const firebaseConfig = {
+      // TODO: https://golf-score-friends-default-rtdb.firebaseio.com/
+      // 예시:
+      // apiKey: "XXXXXXXXXXXX",
+      // authDomain: "XXXXXXXXXXXX.firebaseapp.com",
+      // databaseURL: "https://XXXXXXXXXXXX-default-rtdb.asia-southeast1.firebasedatabase.app",
+      // projectId: "XXXXXXXXXXXX",
+      // storageBucket: "XXXXXXXXXXXX.appspot.com",
+      // messagingSenderId: "XXXXXXXXXXXX",
+      // appId: "XXXXXXXXXXXX"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let currentRoomCode = "";
+    let players = []; // {id, name, rounds:[{score, date, label}]}
+
+    // ---- 유틸 ---------------------------------------------------------------
+    function normalizeRounds(rounds) {
+      if (!Array.isArray(rounds)) return [];
+      return rounds.map(r => {
+        if (typeof r === "number") {
+          return { score: r, date: "", label: "" };
+        }
+        if (r && typeof r === "object" && "score" in r) {
+          return {
+            score: Number(r.score),
+            date: r.date || "",
+            label: r.label || ""
+          };
+        }
+        return null;
+      }).filter(Boolean);
+    }
+
+    function calcAvg(rounds) {
+      const normalized = normalizeRounds(rounds);
+      if (!normalized.length) return 0;
+      const sum = normalized.reduce((a, b) => a + (b.score || 0), 0);
+      return sum / normalized.length;
+    }
+
+    function calcBest(rounds) {
+      const normalized = normalizeRounds(rounds);
+      if (!normalized.length) return 0;
+      return Math.min(...normalized.map(r => r.score));
+    }
+
+    function getTodayISO() {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function classifyScore(score) {
+      if (score === 0) return "";
+      if (score <= 72) return "score-good";
+      if (score <= 85) return "score-mid";
+      return "score-bad";
+    }
+
+    function getRankedPlayers() {
+      const list = players.map(p => {
+        const norm = normalizeRounds(p.rounds);
+        const avg = calcAvg(norm);
+        const best = calcBest(norm);
+        return {
+          ...p,
+          rounds: norm,
+          avgScore: avg,
+          bestScore: best,
+          roundsCount: norm.length
+        };
+      });
+
+      list.sort((a, b) => {
+        if (a.roundsCount === 0 && b.roundsCount === 0) return 0;
+        if (a.roundsCount === 0) return 1;
+        if (b.roundsCount === 0) return -1;
+        if (a.avgScore === b.avgScore) {
+          return a.name.localeCompare(b.name, "ko-KR");
+        }
+        return a.avgScore - b.avgScore;
+      });
+
+      return list;
+    }
+
+    function updateUpdatedLabel() {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mm = String(now.getMinutes()).padStart(2, "0");
+      updatedLabel.textContent = `마지막 입력 · ${hh}:${mm}`;
+    }
+
+    // ---- DOM 참조 ----------------------------------------------------------
+    const roomCodeInput = document.getElementById("roomCodeInput");
+    const btnJoinRoom = document.getElementById("btnJoinRoom");
+    const roomInfo = document.getElementById("roomInfo");
+    const roomError = document.getElementById("roomError");
+
+    const mainContent = document.getElementById("mainContent");
+
+    const playerNameInput = document.getElementById("playerNameInput");
+    const btnAddPlayer = document.getElementById("btnAddPlayer");
+    const playerSelect = document.getElementById("playerSelect");
+    const scoreInput = document.getElementById("scoreInput");
+    const btnAddScore = document.getElementById("btnAddScore");
+    const roundDateInput = document.getElementById("roundDateInput");
+    const roundLabelInput = document.getElementById("roundLabelInput");
+
+    const playerError = document.getElementById("playerError");
+    const scoreError = document.getElementById("scoreError");
+    const updatedLabel = document.getElementById("updatedLabel");
+
+    const rankingBody = document.getElementById("rankingBody");
+    const emptyRanking = document.getElementById("emptyRanking");
+    const summaryInfo = document.getElementById("summaryInfo");
+    const top3Container = document.getElementById("top3Container");
+
+    const btnResetRoom = document.getElementById("btnResetRoom");
+
+    // ---- 렌더링 ------------------------------------------------------------
+    function renderPlayerSelect() {
+      if (!players.length) {
+        playerSelect.innerHTML = '<option value="">먼저 플레이어를 추가하세요</option>';
+        return;
+      }
+      playerSelect.innerHTML = "";
+      const def = document.createElement("option");
+      def.value = "";
+      def.textContent = "플레이어 선택";
+      playerSelect.appendChild(def);
+      players.forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p.id;
+        opt.textContent = p.name;
+        playerSelect.appendChild(opt);
+      });
+    }
+
+    function renderRanking() {
+      const list = getRankedPlayers();
+      rankingBody.innerHTML = "";
+
+      if (!list.length) {
+        emptyRanking.style.display = "block";
+        summaryInfo.textContent = "-";
+        return;
+      } else {
+        emptyRanking.style.display = "none";
+      }
+
+      let totalAvgSum = 0;
+      let totalCountWithRounds = 0;
+
+      list.forEach((p, index) => {
+        const tr = document.createElement("tr");
+
+        const rankTd = document.createElement("td");
+        rankTd.className = "rank-cell";
+        rankTd.textContent = p.roundsCount === 0 ? "-" : index + 1;
+        tr.appendChild(rankTd);
+
+        const nameTd = document.createElement("td");
+        const main = document.createElement("div");
+        main.className = "name-main";
+        main.textContent = p.name;
+        const sub = document.createElement("div");
+        sub.className = "name-sub";
+        if (p.roundsCount === 0) {
+          sub.textContent = "기록 없음";
+        } else {
+          const latest = p.rounds[p.rounds.length - 1];
+          const dateText = latest.date || "";
+          const labelText = latest.label || "";
+          let recentText = "";
+          if (dateText || labelText) {
+            recentText = ` · 최근 ${dateText} ${labelText}`.trim();
+          }
+          sub.textContent = `${p.roundsCount}라운드${recentText}`;
+        }
+        nameTd.appendChild(main);
+        nameTd.appendChild(sub);
+        tr.appendChild(nameTd);
+
+        const avgTd = document.createElement("td");
+        avgTd.className = "align-right " + classifyScore(p.avgScore);
+        avgTd.textContent = p.roundsCount === 0 ? "-" : p.avgScore.toFixed(1);
+        tr.appendChild(avgTd);
+
+        const bestTd = document.createElement("td");
+        bestTd.className = "align-right " + classifyScore(p.bestScore);
+        bestTd.textContent = p.roundsCount === 0 ? "-" : p.bestScore.toFixed(1);
+        tr.appendChild(bestTd);
+
+        const countTd = document.createElement("td");
+        countTd.className = "align-right";
+        countTd.textContent = p.roundsCount;
+        tr.appendChild(countTd);
+
+        rankingBody.appendChild(tr);
+
+        if (p.roundsCount > 0) {
+          totalAvgSum += p.avgScore;
+          totalCountWithRounds++;
+        }
+      });
+
+      if (totalCountWithRounds === 0) {
+        summaryInfo.textContent = `플레이어 ${players.length}명 · 기록된 라운드 없음`;
+      } else {
+        const overallAvg = totalAvgSum / totalCountWithRounds;
+        summaryInfo.textContent = `플레이어 ${players.length}명 · 평균스코어(전체) ${overallAvg.toFixed(1)}`;
+      }
+    }
+
+    function renderTop3() {
+      const list = getRankedPlayers().filter(p => p.roundsCount > 0);
+      if (!list.length) {
+        top3Container.innerHTML = '<div class="empty">데이터가 없습니다. 스코어를 하나 이상 입력해보세요.</div>';
+        return;
+      }
+      const top3 = list.slice(0, 3);
+      const wrapper = document.createElement("div");
+      wrapper.className = "top3-list";
+
+      top3.forEach((p, idx) => {
+        const item = document.createElement("div");
+        item.className = "top3-item";
+        const rankDiv = document.createElement("div");
+        rankDiv.className = "top3-rank";
+        rankDiv.textContent = `No.${idx + 1}`;
+        const nameDiv = document.createElement("div");
+        nameDiv.className = "top3-name";
+        nameDiv.textContent = p.name;
+        const scoreDiv = document.createElement("div");
+        scoreDiv.className = "top3-score";
+        scoreDiv.textContent = `평균 ${p.avgScore.toFixed(1)} · 베스트 ${p.bestScore.toFixed(1)}`;
+
+        const latest = p.rounds[p.rounds.length - 1];
+        const roundsDiv = document.createElement("div");
+        roundsDiv.style.fontSize = "10px";
+        roundsDiv.style.color = "#9ca3af";
+        const dateText = latest.date || "";
+        const labelText = latest.label || "";
+        let recentText = "";
+        if (dateText || labelText) {
+          recentText = `최근: ${dateText} ${labelText}`.trim();
+        }
+        roundsDiv.textContent = `${p.roundsCount} 라운드${recentText ? " · " + recentText : ""}`;
+
+        item.appendChild(rankDiv);
+        item.appendChild(nameDiv);
+        item.appendChild(scoreDiv);
+        item.appendChild(roundsDiv);
+        wrapper.appendChild(item);
+      });
+
+      const summaryRow = document.createElement("div");
+      summaryRow.className = "summary-row";
+
+      const totalRounds = players.reduce((acc, p) => acc + normalizeRounds(p.rounds).length, 0);
+      const pill1 = document.createElement("div");
+      pill1.className = "summary-pill";
+      pill1.textContent = `플레이어 ${players.length}명`;
+      const pill2 = document.createElement("div");
+      pill2.className = "summary-pill";
+      pill2.textContent = `기록된 라운드 ${totalRounds}회`;
+
+      summaryRow.appendChild(pill1);
+      summaryRow.appendChild(pill2);
+
+      top3Container.innerHTML = "";
+      top3Container.appendChild(wrapper);
+      top3Container.appendChild(summaryRow);
+    }
+
+    function renderAll() {
+      renderPlayerSelect();
+      renderRanking();
+      renderTop3();
+    }
+
+    // ---- Firebase 동기화 ---------------------------------------------------
+    let roomRef = null;
+
+    function subscribeRoom(roomCode) {
+      if (!roomCode) return;
+      if (roomRef) {
+        roomRef.off();
+      }
+      roomRef = db.ref("rooms/" + roomCode);
+
+      roomRef.on("value", (snapshot) => {
+        const data = snapshot.val();
+        if (!data) {
+          players = [];
+          renderAll();
+          updatedLabel.textContent = "-";
+          return;
+        }
+        players = (data.players || []).map(p => ({
+          id: p.id,
+          name: p.name,
+          rounds: normalizeRounds(p.rounds || [])
+        }));
+        renderAll();
+        updatedLabel.textContent = data.lastUpdated || "-";
+      });
+    }
+
+    function saveRoom() {
+      if (!currentRoomCode || !roomRef) return;
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mm = String(now.getMinutes()).padStart(2, "0");
+      const timeStr = `${hh}:${mm}`;
+      roomRef.set({
+        players,
+        lastUpdated: `마지막 입력 · ${timeStr}`
+      });
+    }
+
+    // ---- 이벤트 ------------------------------------------------------------
+    btnJoinRoom.addEventListener("click", () => {
+      const code = roomCodeInput.value.trim();
+      roomError.style.display = "none";
+      if (!code) {
+        roomError.textContent = "방 코드를 입력해주세요.";
+        roomError.style.display = "block";
+        return;
+      }
+      currentRoomCode = code;
+      roomInfo.textContent = `현재 방: ${currentRoomCode}`;
+      mainContent.style.opacity = "1";
+      mainContent.style.pointerEvents = "auto";
+
+      // 방 입장 시 구독 시작
+      subscribeRoom(currentRoomCode);
+    });
+
+    btnAddPlayer.addEventListener("click", () => {
+      playerError.style.display = "none";
+      scoreError.style.display = "none";
+      if (!currentRoomCode) {
+        playerError.textContent = "먼저 방에 입장해주세요.";
+        playerError.style.display = "block";
+        return;
+      }
+
+      const name = playerNameInput.value.trim();
+      if (!name) {
+        playerError.textContent = "이름을 입력해주세요.";
+        playerError.style.display = "block";
+        return;
+      }
+      const exists = players.some(p => p.name === name);
+      if (exists) {
+        playerError.textContent = "이미 같은 이름의 플레이어가 있습니다.";
+        playerError.style.display = "block";
+        return;
+      }
+      const newPlayer = {
+        id: Date.now().toString(),
+        name,
+        rounds: []
+      };
+      players.push(newPlayer);
+      saveRoom();
+      playerNameInput.value = "";
+    });
+
+    btnAddScore.addEventListener("click", () => {
+      scoreError.style.display = "none";
+      playerError.style.display = "none";
+      if (!currentRoomCode) {
+        scoreError.textContent = "먼저 방에 입장해주세요.";
+        scoreError.style.display = "block";
+        return;
+      }
+
+      const playerId = playerSelect.value;
+      if (!playerId) {
+        scoreError.textContent = "플레이어를 선택해주세요.";
+        scoreError.style.display = "block";
+        return;
+      }
+
+      const rawScore = scoreInput.value.trim();
+      if (!rawScore) {
+        scoreError.textContent = "스코어를 입력해주세요.";
+        scoreError.style.display = "block";
+        return;
+      }
+      const score = Number(rawScore);
+      if (isNaN(score) || score <= 0) {
+        scoreError.textContent = "올바른 숫자를 입력해주세요.";
+        scoreError.style.display = "block";
+        return;
+      }
+
+      const dateValue = roundDateInput.value || getTodayISO();
+      const labelValue = roundLabelInput.value.trim();
+
+      const player = players.find(p => p.id === playerId);
+      if (!player) {
+        scoreError.textContent = "플레이어를 찾을 수 없습니다.";
+        scoreError.style.display = "block";
+        return;
+      }
+
+      player.rounds = normalizeRounds(player.rounds);
+      player.rounds.push({
+        score,
+        date: dateValue,
+        label: labelValue
+      });
+
+      saveRoom();
+      scoreInput.value = "";
+      if (!roundDateInput.value) {
+        roundDateInput.value = getTodayISO();
+      }
+    });
+
+    btnResetRoom.addEventListener("click", () => {
+      if (!currentRoomCode || !roomRef) return;
+      const ok = confirm("정말 이 방의 모든 데이터를 초기화할까요?");
+      if (!ok) return;
+      roomRef.set(null);
+    });
+
+    // 엔터키 핸들링
+    playerNameInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") btnAddPlayer.click();
+    });
+    scoreInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") btnAddScore.click();
+    });
+    roomCodeInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") btnJoinRoom.click();
+    });
+
+    // 초기값
+    roundDateInput.value = getTodayISO();
+  </script>
+</body>
+</html>
